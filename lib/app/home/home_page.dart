@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:provider_playgroud/app/home/about_page.dart';
 import 'package:provider_playgroud/common_widgets/avatar.dart';
 import 'package:provider_playgroud/models/avatar_reference.dart';
 import 'package:provider_playgroud/services/firebase_auth_service.dart';
@@ -22,12 +23,12 @@ class HomePage extends StatelessWidget {
 
   Future<void> _onAbout(BuildContext context) async {
     
-    // await Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     fullscreenDialog: true,
-    //     builder: (_) => AboutPage(),
-    //   ),
-    // );
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => AboutPage(),
+      ),
+    );
   }
 
   Future<void> _chooseAvatar(BuildContext context) async {
@@ -35,14 +36,13 @@ class HomePage extends StatelessWidget {
       final imagePicker = Provider.of<ImagePickerService>(context);
       final file = await imagePicker.pickImage(source: ImageSource.gallery);
       if (file != null) {
-        final user = Provider.of<CurrentUser>(context, listen: false);
         final storage = Provider.of<FirebaseStorageService>(context);
         final downloadUrl =
-            await storage.uploadAvatar(uid: user.uid, file: File(file.path));
+            await storage.uploadAvatar(file: File(file.path));
         // 3. Save url to Firestore
         final database = Provider.of<FirestoreService>(context);
         await database.setAvatarReference(
-          uid: user.uid,
+         
           avatarReference: AvatarReference(downloadUrl),
         );
         // 4. (optional) delete local file as no longer needed
@@ -89,9 +89,8 @@ class HomePage extends StatelessWidget {
 
   Widget _buildUserInfo(BuildContext context) {
     final database = Provider.of<FirestoreService>(context);
-    final user = Provider.of<CurrentUser>(context, listen: false);
     return StreamBuilder<AvatarReference>(
-        stream: database.avatarReferenceStream(uid: user.uid),
+        stream: database.avatarReferenceStream(),
         builder: (context, snapshot) {
           final avatarReference = snapshot.data;
           return Avatar(

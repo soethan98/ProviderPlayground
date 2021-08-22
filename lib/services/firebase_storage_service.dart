@@ -5,24 +5,21 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'firestore_path.dart';
 
 class FirebaseStorageService {
- 
+  final String uid;
+
+  FirebaseStorageService({required this.uid});
+
   /// Upload an avatar from file
-  Future<String> uploadAvatar({
-    required File file,
-    required String uid
-  }) async =>
-      await upload(
+  Future<String> uploadAvatar({required File file}) async => await upload(
         file: file,
         path: FirestorePath.avatar(uid) + '/avatar.png',
         contentType: 'image/png',
-        uid: uid
       );
 
   Future<String> upload(
       {required File file,
       required String path,
-      required String contentType,
-      required String uid}) async {
+      required String contentType}) async {
     final storageReference = FirebaseStorage.instance.ref().child(path);
     final uploadTask = storageReference.putFile(file);
 
